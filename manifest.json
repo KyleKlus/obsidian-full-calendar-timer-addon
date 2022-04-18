@@ -1,0 +1,9 @@
+{
+	"id": "obsidian-custom-timer-plugin",
+	"name": "Custom Timer Plugin",
+	"version": "1.0.1",
+	"minAppVersion": "0.13.0",
+	"description": "This is a very versatile timer plugin for Obsidian.",
+	"author": "Kyle Klus",
+	"isDesktopOnly": true
+}
