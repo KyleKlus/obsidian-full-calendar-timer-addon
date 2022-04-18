@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-custom-timer-plugin",
-	"name": "Custom Timer Plugin",
-	"version": "1.0.1",
-	"minAppVersion": "0.13.0",
-	"description": "This is a very versatile timer plugin for Obsidian.",
+	"id": "obsidian-full-calendar-timer-addon",
+	"name": "Full Calendar Timer Addon",
+	"version": "1.0.0",
+	"minAppVersion": "0.14.5",
+	"description": "This is a timer addon for the full calendar plugin.",
 	"author": "Kyle Klus",
 	"isDesktopOnly": true
 }

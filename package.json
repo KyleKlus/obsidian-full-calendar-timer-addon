@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-custom-timer-plugin",
-	"version": "1.0.1",
-	"description": "This is a timer plugin for Obsidian (https://obsidian.md)",
+	"name": "obsidian-full-calendar-timer-addon",
+	"version": "1.0.0",
+	"description": "This is a timer addon for Obsidian Full Calendar Plugin (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

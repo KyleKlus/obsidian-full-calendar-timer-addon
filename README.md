@@ -1,18 +1,15 @@
-## Custom Timer Plugin
+# Timer Addon for the Full Calendar Plugin
+---
+**This is an addon, which adds a clock/timer to the statusbar.**
 
-**You always wanted to create a completely customizable timer in obsidian, which exactly fits your needs?**
+## Planed features
+---
+- [x] Simple clock which shows the current time in the statusbar
 
-_If yes, then you have found what you've searched for:_
+- [ ] The clock changes to timer mode if the next event is within a specifiable range
 
-### Planned Functions:
+- [ ] The calendar directory can be specified
 
-- [ ] Create a stopwatch
-- [x] Shows a little clock in the status bar
-- [x] Shows a your remaining time in the status bar
-- [ ] Enable a notifications for any timer
-- [ ] Log your custom timer to a note (Yes even daily notes)
-- [x] Specify custom tags for your log entry
+- [ ] The timer shows the current event and the time left or until it will start
 
-### Customize everything
-
-You can enable/ disable any function you need/don't need, such that you will get exactly what you need. 
+- [ ] The timer open a notification, when the next event starts
