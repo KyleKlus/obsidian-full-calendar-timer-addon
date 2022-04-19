@@ -55,7 +55,8 @@ export class FileHandler {
     }
     
     async hasFileChanged() : Promise<boolean> {
-        if(this.curFile == null || this.curFile == undefined || this.curFile.stat.mtime != this.curFileMTime){
+        if(this.curFile == null || this.curFile == undefined || this.curFile.parent == null || this.curFile.stat.mtime != this.curFileMTime){
+            this.plugin.eventKeeper.reset();
             return await this.foundNextEventFile();
         }
 
