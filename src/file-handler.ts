@@ -1,151 +1,119 @@
-import { App, normalizePath, TFile, Vault } from "obsidian";
-import CustomTimerPlugin from "./main"
-import { TimerSettings } from "./settings";
+import { App, TFile, Vault } from "obsidian";
+import TimerAddon from "./main";
+import { Settings } from "./settings";
+import { Moment } from 'moment';
 
-
-export class FileHandler{
-    plugin: CustomTimerPlugin;
-    settings: TimerSettings
+export class FileHandler {
+    settings: Settings;
+    plugin: TimerAddon;
     app: App;
     vault: Vault;
 
-    timeRe: RegExp;
-
-    lastLine: string;
-    lastTime: string;
-    isDayPlannerFound: boolean;
-
-    constructor(plugin: CustomTimerPlugin){
+    curFile: TFile;
+    curFileMTime: number;
+    curFileContent: string;
+    curStartMoment: Moment;
+    curEndMoment: Moment;
+    
+    constructor(plugin: TimerAddon){
         this.plugin = plugin;
-        this.settings = this.plugin.settings;
+        this.settings = plugin.settings;
         this.app = this.plugin.app;
         this.vault = this.app.vault;
-        this.timeRe = new RegExp('.*([0-9][0-9]:[0-9][0-9]).*');
+        
+        this.curFile = null;
+        this.curFileContent = null;
+        this.curStartMoment = null;
+        this.curEndMoment = null;
+        this.curFileMTime = -1;
+    }
+    
+    
+    getCurDate() : string{
+        return window.moment().format(this.settings.dateFormat);
+    }
+    
+    getCurTime() : string{
+        return window.moment().format(this.settings.clockFormat);
     }
 
-    async logToFile(tag:string, time:string, name:string, duration:string): Promise<boolean>{
-        if(!this.settings.enableLog){
-            return false;
+    getCurFileName() : string{
+        // Cut off date in filename
+        return this.curFile.basename.split(" ").reverse().splice(0, 2).reverse().join(" ");
+    }
+
+    getCurStart() : Moment{
+        return this.curStartMoment;
+    }
+
+    getCurEnd() : Moment {
+        return this.curEndMoment;
+    }
+
+    isFileFound() : boolean{
+        return this.curFile != null;
+    }
+    
+    async hasFileChanged() : Promise<boolean> {
+        if(this.curFile == null || this.curFile == undefined || this.curFile.stat.mtime != this.curFileMTime){
+            return await this.foundNextEventFile();
         }
 
+        return false;
+    }
+    
+    async foundNextEventFile(): Promise<boolean>{
+        const files = this.getFilesInEventDir();
         this.reset();
+        this.curStartMoment = window.moment("00:01", "HH:mm");
+        this.curEndMoment = window.moment("23:59", "HH:mm");
 
-        let fileName: string;
-
-        if(this.settings.logToDailyNote){
-            fileName = window.moment().format(this.settings.dailyNoteFormat).toString();
-        }else{
-            fileName = this.settings.logFileName;
-        }
-
-        const file = this.getTFile(fileName);
-
-        if(file == null){
+        if(files.length == 0){ // Directory is empty
             return false;
         }
 
-        const content = await this.vault.cachedRead(file);
-        console.log(content);
-        //let lines = content.split('\n');
-        //console.log(lines);
-        this.vault.modify(file, await (await this.parseLines((await this.vault.cachedRead(file)).split('\n'), tag, time, name, duration)).join('\n'));
-        /* console.log(lines);
-        content = lines.join('\n');
+        for(let i = 0; i < files.length; i++){
+            // Parse file content into usable data
+            const tmp_content = (await (this.vault.read(files[i])));
 
-        this.vault.modify(file, content);*/
+            const tmp_start = this.extractKeyValue(tmp_content, "startTime");
+            const tmp_startMoment = window.moment(tmp_start, "HH:mm");
+            const tmp_startOffsetMoment = tmp_startMoment.subtract(this.settings.minUntilTimerMode, "minutes");
 
-        return true;
-    }
+            const tmp_end = this.extractKeyValue(tmp_content, "endTime");
+            const tmp_endMoment = window.moment(tmp_end, "HH:mm");
 
-    getTFile(fileName: string): TFile{
-        fileName = normalizePath(fileName);
-        return this.app.metadataCache.getFirstLinkpathDest(fileName, '');
-    }
-
-    private parseLines(lines: string[], tag: string, time: string, name: string, state: string): string[]{
-        if (lines.contains(this.buildLogString(tag, time, name, state))){
-            console.log('test');
-            return lines;
-        }
-
-
-        let i;
-        for(i = 0 ; i < lines.length ; i++){
-            if(!this.isDayPlannerFound){
-                this.isDayPlannerFound = lines[i].contains('# Day Planner'); 
-                console.log('Day Planner found in line ' + i + ': ' + this.isDayPlannerFound);
-                console.log(lines);
-            } else if(this.isDayPlannerLine(lines[i])){
-                const lineTime = this.timeRe.exec(lines[i])[1];
-                const result = this.compareMoments(time, lineTime);
-                console.log('Day Planner Line found in line ' + i);
-                console.log(lines);
-                if(lines[i].contains(this.settings.unusedTag) && result === 0){
-                    console.log('Target line nr.: ' + i + ' found (Direct result)');
-                    lines[i] = lines[i].replace(lineTime + ' BREAK', this.buildLogString(tag, time, name, state));
-                    console.log(lines);
-                    return lines;
-                }
-           
-                if(this.isLastLineValid(tag, name, state)){
-                    if(time === this.lastTime || time === lineTime){
-                        console.log('No space before line nr.: ' + i);
-                        console.log(lines);
-                        break;
-                    }
-                    console.log(lines);
-                    if(result < 0 && this.compareMoments(this.lastTime, time) < 0){
-                        console.log('Target line nr.: ' + i + ' found (After search)');
-                        console.log(lines);
-                        console.log(lines.splice(i, 0, '- [ ] ' + this.buildLogString(tag, time, name, state)));
-                        console.log(lines);
-                        return lines;
-                    }
-                }
-                
-                this.lastLine = lines[i];
-                this.lastTime = this.timeRe.exec(lines[i])[1];
+            // Search for the nearest relevant event
+            if(this.curEndMoment.isAfter(tmp_endMoment) && window.moment().isAfter(tmp_startOffsetMoment) && window.moment().isBefore(tmp_endMoment)){
+                // Update best candidate for needed file
+                this.curFileContent = tmp_content;
+                this.curFile = files[i];
+                this.curStartMoment = tmp_startMoment;
+                this.curEndMoment = tmp_endMoment;
+                this.curFileMTime = this.curFile.stat.mtime;
             }
-        }  
-
-        console.log('No BREAK OR TASK FOUND thus now appending stuff');
-        lines.push(this.buildLogString(tag, time, name, state));
-        console.log(lines);
-        return lines;
-    }
-
-    private buildLogString(tag: string, time: string, name: string, state: string): string{
-        return time + ' ' + tag + ' ' + state + ' ' + name;
-    }
-
-    private compareMoments(first: string, second:string): number{
-        const firstMoment = window.moment(first, 'HH:mm');
-        const secondMoment = window.moment(second, 'HH:mm');
-
-        if(firstMoment.diff(secondMoment, 'minutes') < 0){
-            return -1;
-        }else if(firstMoment.diff(secondMoment, 'minutes') > 0){
-            return 1;
-        }else{
-            return firstMoment.diff(secondMoment, 'minutes');
         }
+
+        return this.curFile != null;
     }
 
-    private isDayPlannerLine(line: string): boolean{
-        return line.contains('- [') && this.timeRe.exec(line) != null;
+    reset(){
+        this.curFile = null;
+        this.curEndMoment = null;
+        this.curFileContent = null;
+        this.curStartMoment = null;
     }
 
-    private isLastLineValid(tag: string, name:string, state: string){
-        return this.lastLine != null && this.hasLastLineTags(tag, name, state);
+    private extractKeyValue(file: string, key: string): string{
+        return file.split('\n')
+            .filter(l => l.startsWith(key))[0]
+            .split(': ')
+            .filter(e => !e.startsWith(key))
+            .join();
     }
-
-    private hasLastLineTags(tag: string, name:string, state:string): boolean{
-        return this.lastLine.contains(this.settings.unusedTag) || this.lastLine.contains('Started') || this.lastLine.contains('Resumed') || this.lastLine.contains(this.settings.breakTag);
-    }
-
-    private reset(){
-        this.lastLine = null;
-        this.lastTime = null;
-        this.isDayPlannerFound = false;
+    
+    private getFilesInEventDir(): TFile[]{
+        // Filter out: files in other dir and old files
+        return this.vault.getMarkdownFiles().filter(f => f.path.startsWith(this.settings.calendarPath) && f.basename.startsWith(this.getCurDate()));
     }
 }

@@ -3,14 +3,14 @@ import {
     PluginSettingTab,
     Setting
 } from 'obsidian';
-import CustomTimerPlugin from './main';
+import TimerAddon from './main';
 
 
 
-export class TimerSettingsTab extends PluginSettingTab {
-	plugin: CustomTimerPlugin;
+export class SettingsTab extends PluginSettingTab {
+	plugin: TimerAddon;
 
-	constructor(app: App, plugin: CustomTimerPlugin) {
+	constructor(app: App, plugin: TimerAddon) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -35,58 +35,44 @@ export class TimerSettingsTab extends PluginSettingTab {
 					}
 					await this.plugin.saveSettings();
 				}));
-		
+
 		new Setting(containerEl)
-			.setName('Enable Statusbar Clock')
-			.setDesc('This enables the clock in the statusbar.')
+			.setName('Enable Timer')
+			.setDesc('This enables the timer function.')
 			.addToggle(boolean => boolean
-				.setValue(this.plugin.settings.enableClock)
+				.setValue(true)
 				.onChange(async (value) => {
-					this.plugin.settings.enableClock = value;
+					this.plugin.settings.enableTimerMode = value;
 					await this.plugin.saveSettings();
-					if(this.plugin.settings.enableClock){
-						this.plugin.showEl(this.plugin.statusClock);
-						this.plugin.updateStatusClock();
-					}else{
-						this.plugin.hideEl(this.plugin.statusClock);
-					}
 				}));
 
 		new Setting(containerEl)
-			.setName('Enable Logging')
-			.setDesc('This enables the ability to log to a specific file.')
-			.addToggle(boolean => boolean
-				.setValue(this.plugin.settings.enableLog)
-				.onChange(async (value) => {
-					this.plugin.settings.enableLog = value;
-				}));
-
-		new Setting(containerEl)
-			.setName('Log to daily note')
-			.setDesc('This enables the ability to log to the daily note (is overridden by "Enable Logging").')
-			.addToggle(boolean => boolean
-				.setValue(this.plugin.settings.logToDailyNote)
-				.onChange(async (value) => {
-					this.plugin.settings.logToDailyNote = value;
-				}));
-
-		new Setting(containerEl)
-			.setName('Log File')
-			.setDesc('This the file to which the timer will be logged.')
+			.setName('Calendar Path')
+			.setDesc('This is the path of the calendar directory.')
 			.addText(text => text
-				.setValue(this.plugin.settings.logFileName)
+				.setValue(this.plugin.settings.calendarPath)
 				.onChange(async (value) => {
-					this.plugin.settings.logFileName = value;
+					this.plugin.settings.calendarPath = value;
 					await this.plugin.saveSettings();
 				}));
 		
 		new Setting(containerEl)
-			.setName('Daily note format')
-			.setDesc('This the format of your daily notes.')
+			.setName('Time Until Timer')
+			.setDesc('This is the time (in min.) until the timer shows an upcoming event in the statusbar.')
 			.addText(text => text
-				.setValue(this.plugin.settings.dailyNoteFormat)
+				.setValue(this.plugin.settings.minUntilTimerMode)
 				.onChange(async (value) => {
-					this.plugin.settings.dailyNoteFormat = value;
+					this.plugin.settings.minUntilTimerMode = value;
+					await this.plugin.saveSettings();
+				}));
+		
+		new Setting(containerEl)
+			.setName('Date format')
+			.setDesc('This the format of your dates.')
+			.addText(text => text
+				.setValue(this.plugin.settings.dateFormat)
+				.onChange(async (value) => {
+					this.plugin.settings.dateFormat = value;
 					await this.plugin.saveSettings();
 				}));
 

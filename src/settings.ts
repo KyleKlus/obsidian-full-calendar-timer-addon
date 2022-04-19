@@ -1,7 +1,7 @@
-export interface TimerSettings {
-    enableClock: boolean;
-    enableLog: boolean;
-    logToDailyNote: boolean;
+export interface Settings {
+    enableTimerMode: boolean;
+
+    minUntilTimerMode: string;
 
     startTag: string;
     unusedTag: string;
@@ -14,14 +14,15 @@ export interface TimerSettings {
     clockTag: string;
 
     clockFormat: string;
+    calendarPath: string;
     logFileName: string;
-    dailyNoteFormat: string;
+    dateFormat: string;
 }
 
-export const DEFAULT_SETTINGS: TimerSettings = {
-    enableClock: true,
-    enableLog: true,
-    logToDailyNote: true,
+export const DEFAULT_SETTINGS: Settings = {
+    enableTimerMode: true,
+
+    minUntilTimerMode: '10',
 
     breakTag: 'BREAK',
     unusedTag: 'UNUSED',
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: TimerSettings = {
     clockTag: 'CLOCK',
 
     clockFormat: 'HH:mm',
+    calendarPath: '/',
     logFileName: 'CustomTimerLog',
-    dailyNoteFormat: 'DD.MM.YYYY'
+    dateFormat: 'DD-MM-YYYY'
 }
