@@ -86,57 +86,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.breakTag = value;
 					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Unused Tag')
-			.setDesc('This sets the tag for a usable space in your Day Planner.')
-			.addText(text => text
-				.setValue(this.plugin.settings.unusedTag)
-				.onChange(async (value) => {
-					this.plugin.settings.unusedTag = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Start Tag')
-			.setDesc('This sets the tag for a paused timer.')
-			.addText(text => text
-				.setValue(this.plugin.settings.startTag)
-				.onChange(async (value) => {
-					this.plugin.settings.startTag = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Stop Tag')
-			.setDesc('This sets the tag for a stopped timer.')
-			.addText(text => text
-				.setValue(this.plugin.settings.stopTag)
-				.onChange(async (value) => {
-					this.plugin.settings.stopTag = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Canceled Tag')
-			.setDesc('This sets the tag for a canceled timer.')
-			.addText(text => text
-				.setValue(this.plugin.settings.cancelTag)
-				.onChange(async (value) => {
-					this.plugin.settings.cancelTag = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Task Tag')
-			.setDesc('This sets the tag for a task.')
-			.addText(text => text
-				.setValue(this.plugin.settings.taskTag)
-				.onChange(async (value) => {
-					this.plugin.settings.taskTag = value;
-					await this.plugin.saveSettings();
-				}));
+				}));	
 
 		new Setting(containerEl)
 			.setName('Timer Tag')
@@ -145,16 +95,6 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.timerTag)
 				.onChange(async (value) => {
 					this.plugin.settings.timerTag = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Stop Watch Tag')
-			.setDesc('This sets the tag for a stop watch.')
-			.addText(text => text
-				.setValue(this.plugin.settings.stopWatchTag)
-				.onChange(async (value) => {
-					this.plugin.settings.stopWatchTag = value;
 					await this.plugin.saveSettings();
 				}));
 

@@ -1,16 +1,11 @@
 export interface Settings {
     enableTimerMode: boolean;
+    enableNotifications: boolean;
 
     minUntilTimerMode: string;
 
-    startTag: string;
-    unusedTag: string;
-    stopTag: string;
     breakTag: string;
-    cancelTag: string;
-    taskTag: string;
     timerTag: string;
-    stopWatchTag: string;
     clockTag: string;
 
     clockFormat: string;
@@ -21,17 +16,12 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
     enableTimerMode: true,
+    enableNotifications: true,
 
     minUntilTimerMode: '10',
 
     breakTag: 'BREAK',
-    unusedTag: 'UNUSED',
-    startTag: 'STARTED',
-    stopTag: 'STOPPED',
-    cancelTag: 'CANCELED',
-    taskTag: 'TASK',
     timerTag: 'TIMER',
-    stopWatchTag: 'STOP WATCH',
     clockTag: 'CLOCK',
 
     clockFormat: 'HH:mm',
