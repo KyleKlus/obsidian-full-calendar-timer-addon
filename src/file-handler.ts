@@ -78,7 +78,7 @@ export class FileHandler {
 
             const tmp_start = this.extractKeyValue(tmp_content, "startTime");
             const tmp_startMoment = window.moment(tmp_start, "HH:mm");
-            const tmp_startOffsetMoment = tmp_startMoment.subtract(this.settings.minUntilTimerMode, "minutes");
+            const tmp_startOffsetMoment = window.moment(tmp_start, "HH:mm").subtract(this.settings.minUntilTimerMode, "minutes");
 
             const tmp_end = this.extractKeyValue(tmp_content, "endTime");
             const tmp_endMoment = window.moment(tmp_end, "HH:mm");
@@ -102,6 +102,7 @@ export class FileHandler {
         this.curEndMoment = null;
         this.curFileContent = null;
         this.curStartMoment = null;
+        this.curFileMTime = -1;
     }
 
     private extractKeyValue(file: string, key: string): string{

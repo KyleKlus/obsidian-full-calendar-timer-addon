@@ -34,12 +34,22 @@ export class EventKeeper{
     }
     
     async update() {
-        if (this.isEventUpdateNeeded()) {
+        if (await this.isEventUpdateNeeded()) {
             this.curEvent = this.createEvent();
 
             if (this.curEvent == null){
                 this.mode = Mode.CLOCK;
             } else {
+                if(this.settings.enableNotifications){
+                    let message = "\"" + this.curEvent.getName() + "\" is ";
+                    if(this.curEvent.getStart().isSameOrBefore(window.moment())) {
+                        message += "started!";
+                    } else {
+                        message += "active!";
+                    }
+                    new Notification("Full Calendar", { body: message })
+                }
+                
                 this.mode = Mode.TIMER;
             }
         } else {
@@ -67,18 +77,20 @@ export class EventKeeper{
         this.mode = Mode.CLOCK;
     }
 
-    private isEventUpdateNeeded(): boolean{
+    private async isEventUpdateNeeded(): Promise<boolean>{
         // Reset if last event is over
         if(this.curEvent != null && this.curEvent.endTime.isBefore(window.moment())){
+            if(this.settings.enableNotifications){
+                const message = "\"" + this.curEvent.getName() + "\" ended!";
+                new Notification("Full Calendar", { body: message })
+            }
             this.reset();
             this.fileHandler.reset();
         }
 
-        if(this.fileHandler.hasFileChanged()){  
-            return true;
-        }
-        
-        return false;
+        // TODO: find a better solution
+        // Needs this arrangement in order to work -> hasFileCHanged loads new file
+        return await this.fileHandler.hasFileChanged() ||  this.curEvent == null;
     }
 
     private createEvent(){

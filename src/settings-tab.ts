@@ -47,6 +47,16 @@ export class SettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Enable System Notifications')
+			.setDesc('This enables system notifications')
+			.addToggle(boolean => boolean
+				.setValue(true)
+				.onChange(async (value) => {
+					this.plugin.settings.enableNotifications = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Calendar Path')
 			.setDesc('This is the path of the calendar directory.')
 			.addText(text => text

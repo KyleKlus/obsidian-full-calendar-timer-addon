@@ -8,7 +8,6 @@ export default class TimerAddon extends Plugin {
 	timeKeeper: EventKeeper;
 	statusClock: HTMLElement;
 
-// #region --> Plugin setup
 	async onload() {
 		console.log("Loading timer addon for full calendar");
 		await this.loadSettings();
@@ -31,17 +30,9 @@ export default class TimerAddon extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-// #endregion 
-
-// #region --> Clock functions
-
 	async updateStatusClock() {
 		this.statusClock.setText(await this.timeKeeper.update());
 	}
-
-// #endregion
-
-// #region --> Helper
 
 	hideEl(el: HTMLElement){
 		if(el){
@@ -60,9 +51,8 @@ export default class TimerAddon extends Plugin {
 		this.timeKeeper = new EventKeeper(this);
 		this.statusClock.setText(await this.timeKeeper.update());
 		
-		this.registerInterval(window.setInterval(() => this.updateStatusClock(), 1000));
+		this.registerInterval(window.setInterval(async () => await this.updateStatusClock(), 1000));
 	}
-// #endregion
 }
 
 

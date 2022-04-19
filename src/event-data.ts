@@ -59,10 +59,12 @@ export class Event {
 
     getTimerState(): string{
         let eventName = this.name;
-        let neededDuration = this.getDurationUntilEnd();
+        let msg = ": ";
 
         if (this.startTime.isAfter(window.moment())){
-            neededDuration = this.getDurationUntilStart();
+            msg += this.parseDuration(this.getDurationUntilStart()) + " until start";
+        } else {
+            msg += this.parseDuration(this.getDurationUntilEnd()) + " left";
         }
 
         if(eventName.length > 15 ){
@@ -70,7 +72,7 @@ export class Event {
             eventName += '...';
         }
 
-        return eventName + ': ' + this.parseDuration(neededDuration);
+        return eventName + msg;
     }
 
     private parseDuration(duration: Duration): string{
