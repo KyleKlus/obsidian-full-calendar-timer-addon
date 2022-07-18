@@ -14,25 +14,25 @@ export class FileHandler {
     curFileContent: string;
     curStartMoment: Moment;
     curEndMoment: Moment;
-    
+
     constructor(plugin: TimerAddon){
         this.plugin = plugin;
         this.settings = plugin.settings;
         this.app = this.plugin.app;
         this.vault = this.app.vault;
-        
+
         this.curFile = null;
         this.curFileContent = null;
         this.curStartMoment = null;
         this.curEndMoment = null;
         this.curFileMTime = -1;
     }
-    
-    
+
+
     getCurDate() : string{
         return window.moment().format(this.settings.dateFormat);
     }
-    
+
     getCurTime() : string{
         return window.moment().format(this.settings.clockFormat);
     }
@@ -53,7 +53,7 @@ export class FileHandler {
     isFileFound() : boolean{
         return this.curFile != null;
     }
-    
+
     async hasFileChanged() : Promise<boolean> {
         if(this.curFile == null || this.curFile == undefined || this.curFile.parent == null || this.curFile.stat.mtime != this.curFileMTime){
             this.plugin.eventKeeper.reset();
@@ -62,7 +62,7 @@ export class FileHandler {
 
         return false;
     }
-    
+
     async foundNextEventFile(): Promise<boolean>{
         const files = this.getFilesInEventDir();
         this.reset();
@@ -76,6 +76,7 @@ export class FileHandler {
         for(let i = 0; i < files.length; i++){
             // Parse file content into usable data
             const tmp_content = (await (this.vault.read(files[i])));
+            if(!tmp_content.contains("startTime") || !tmp_content.contains("endTime")){ continue; }
 
             const tmp_start = this.extractKeyValue(tmp_content, "startTime");
             const tmp_startMoment = window.moment(tmp_start, "HH:mm");
@@ -113,7 +114,7 @@ export class FileHandler {
             .filter(e => !e.startsWith(key))
             .join();
     }
-    
+
     private getFilesInEventDir(): TFile[]{
         // Filter out: files in other dir and old files
         return this.vault.getMarkdownFiles().filter(f => f.path.startsWith(this.settings.calendarPath) && f.basename.startsWith(this.getCurDate()));
